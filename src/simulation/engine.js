@@ -5,6 +5,7 @@
  */
 
 import { INITIAL_JUNCTIONS } from '../data/initialJunctions';
+import { PAN_INDIA_JUNCTIONS } from '../data/indianCities';
 import pcuConfig from '../data/pcuConfig.json';
 
 // Poisson random variable generator using Knuth's algorithm
@@ -38,7 +39,8 @@ export class SimulationEngine {
   constructor() {
     this.speedMultiplier = 1; // 1x, 5x, 10x
     this.scenario = "medium"; // low, medium, peak, unbalanced
-    this.junctions = JSON.parse(JSON.stringify(INITIAL_JUNCTIONS));
+    // Combine base fictional junctions + Pan-India junctions
+    this.junctions = JSON.parse(JSON.stringify([...PAN_INDIA_JUNCTIONS, ...INITIAL_JUNCTIONS]));
     this.listeners = new Set();
     this.timer = null;
     this.tickCount = 0;

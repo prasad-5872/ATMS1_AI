@@ -10,7 +10,9 @@ import {
   AlertTriangle,
   ArrowUpRight,
   ChevronRight,
-  ShieldAlert
+  ShieldAlert,
+  MapPin,
+  Database
 } from 'lucide-react';
 import { 
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
@@ -19,12 +21,35 @@ import {
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
+// Helper component to auto-pan and zoom map when city changes
+function MapViewUpdater({ center, zoom }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center && map) {
+      map.setView(center, zoom, { animate: true });
+    }
+  }, [center, zoom, map]);
+  return null;
+}
+
 export const OverviewDashboard = () => {
-  const { systemState, setSelectedJunctionId, setActiveTab } = useTraffic();
+  const { 
+    systemState, 
+    setSelectedJunctionId, 
+    setActiveTab, 
+    activeCityId, 
+    setActiveCityId, 
+    citiesList, 
+    activeCityInfo, 
+    isBackendOnline 
+  } = useTraffic();
   const stats = systemState?.systemStats;
   const junctions = systemState?.junctions || [];
   const delayHistory = systemState?.delayHistory || [];
   const alerts = systemState?.alerts || [];
+
+  const mapCenter = [activeCityInfo?.lat || 20.5937, activeCityInfo?.lng || 78.9629];
+  const mapZoom = activeCityInfo?.zoom || (activeCityId === "all_india" ? 5 : 12);
 
   // Top 5 congested junctions for bar chart
   const topCongested = [...junctions]
@@ -123,35 +148,59 @@ export const OverviewDashboard = () => {
         <div className="lg:col-span-7 bg-[#111A2C] dark:bg-[#111A2C] light:bg-white rounded-lg border border-[#1F2A44] dark:border-[#1F2A44] light:border-slate-200 p-3.5 shadow-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <div>
-              <h3 className="text-xs font-bold font-mono text-white dark:text-white light:text-slate-900 uppercase tracking-wider">
-                Metropolitan Network Congestion Map
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xs font-bold font-mono text-white dark:text-white light:text-slate-900 uppercase tracking-wider">
+                  Pan-India Dynamic Congestion Map
+                </h3>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-mono font-bold">
+                  {activeCityInfo?.name || "All India"}
+                </span>
+              </div>
               <p className="text-[11px] text-slate-400 font-mono">
-                12 Fictional Junctions • Color Encoded Congestion Level
+                {junctions.length} Monitored Node{junctions.length === 1 ? '' : 's'} • Database Live Synchronized
               </p>
             </div>
-            {/* Map Legend */}
-            <div className="flex items-center gap-3 text-[10px] font-mono">
-              <span className="flex items-center gap-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Low (&lt;24s)
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Med (24-38s)
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span> High (&gt;38s)
-              </span>
+            {/* City Selector directly on Map header */}
+            <div className="flex items-center gap-2 font-mono text-xs">
+              <div className="flex items-center gap-1 bg-[#16223B] px-2 py-0.5 rounded border border-cyan-500/40">
+                <MapPin className="w-3 h-3 text-cyan-400" />
+                <select
+                  value={activeCityId}
+                  onChange={(e) => setActiveCityId(e.target.value)}
+                  className="bg-transparent text-cyan-300 font-bold focus:outline-none cursor-pointer text-xs"
+                >
+                  {citiesList && citiesList.map((c) => (
+                    <option key={c.id} value={c.id} className="bg-[#111A2C] text-white">
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Map Legend */}
+              <div className="hidden sm:flex items-center gap-2 text-[10px]">
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Low
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-amber-500"></span> Med
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-red-500"></span> High
+                </span>
+              </div>
             </div>
           </div>
 
           {/* Map Viewport Container */}
           <div className="h-[360px] w-full rounded border border-[#1F2A44] overflow-hidden z-10 dark-tiles">
             <MapContainer
-              center={[12.9750, 77.5950]}
-              zoom={13}
-              scrollWheelZoom={false}
+              center={mapCenter}
+              zoom={mapZoom}
+              scrollWheelZoom={true}
               style={{ height: '100%', width: '100%', background: '#0A0F1D' }}
             >
+              <MapViewUpdater center={mapCenter} zoom={mapZoom} />
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

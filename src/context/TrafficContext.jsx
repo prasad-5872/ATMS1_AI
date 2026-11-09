@@ -15,11 +15,30 @@ export const TrafficProvider = ({ children }) => {
   };
 
   const [systemState, setSystemState] = useState(null);
-  const [selectedJunctionId, setSelectedJunctionId] = useState("J-01");
+  const [selectedJunctionId, setSelectedJunctionId] = useState("BLR-01");
+  const [activeCityId, setActiveCityId] = useState("all_india");
   const [activeTab, setActiveTabState] = useState(getInitialTab);
   const [theme, setTheme] = useState("dark"); // dark, light
   const [operatorRole, setOperatorRole] = useState("Operator"); // Operator, Engineer, Admin
   const [currentTime, setCurrentTime] = useState("");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const toggleSidebarCollapse = () => {
+    setIsSidebarCollapsed(prev => !prev);
+  };
+
+  const handleCityChange = (cityId) => {
+    setActiveCityId(cityId);
+    dataService.setCity(cityId);
+    // Auto-select first junction in this city
+    const state = dataService.latestState || systemState;
+    if (state && state.junctions) {
+      const cityJunction = state.junctions.find(j => j.cityId === cityId);
+      if (cityJunction) {
+        setSelectedJunctionId(cityJunction.id);
+      }
+    }
+  };
 
   const setActiveTab = (tab) => {
     if (typeof window !== 'undefined') {
@@ -94,6 +113,13 @@ export const TrafficProvider = ({ children }) => {
     toggleTheme,
     operatorRole,
     setOperatorRole,
+    isSidebarCollapsed,
+    toggleSidebarCollapse,
+    activeCityId,
+    setActiveCityId: handleCityChange,
+    citiesList: dataService.getCitiesList(),
+    activeCityInfo: dataService.getCityInfo(activeCityId),
+    isBackendOnline: dataService.isBackendOnline,
     currentTime,
     dataService,
     // Actions shortcuts

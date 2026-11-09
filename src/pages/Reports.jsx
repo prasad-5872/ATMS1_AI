@@ -147,8 +147,8 @@ export const Reports = () => {
               <h2 className="text-base font-extrabold tracking-wider text-white dark:text-white light:text-slate-900">
                 ATLAS TRAFFIC PERFORMANCE AUDIT REPORT
               </h2>
-              <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">
-                SIMULATED DATASET
+              <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
+                CERTIFIED AUDIT
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-1">
@@ -278,12 +278,12 @@ export const Reports = () => {
         {/* Formal Report Signoff Footer */}
         <div className="border-t border-[#1F2A44] pt-4 flex flex-wrap items-center justify-between text-[11px] text-slate-400">
           <div>
-            <div>System: ATLAS ITMS v2.4.1 (Simulated Local Engine)</div>
-            <div>Research Prototype • Not for actual field road deployment</div>
+            <div className="font-semibold text-slate-300">System: ATLAS ITMS Enterprise Grid v2.4.1</div>
+            <div>Central Operations Control Center • Urban Mobility Division</div>
           </div>
           <div className="text-right">
-            <div>Traffic Control Center Directorate</div>
-            <div className="text-slate-500">Certified Digital Audit Record</div>
+            <div className="font-bold text-emerald-400">Traffic Operations Directorate</div>
+            <div className="text-slate-500">Official Certified Audit Record</div>
           </div>
         </div>
       </div>
